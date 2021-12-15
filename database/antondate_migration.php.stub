@@ -1,0 +1,25 @@
+<?php
+
+/**
+ * Replace ##tablename with the table and ##fieldname with the field
+ * after which the antondat fields should be inserted
+ */
+
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
+
+class AddAntondate extends Migration {
+
+    /**
+     * Run the migrations.
+     *
+     * @return void
+     */
+    public function up() {
+        Schema::create('##tablename', function(Blueprint $table) {
+            $table->date('date_start')->after('##fieldname');
+            $table->boolean('date_start_ca')->after('date_start');
+            $table->date('date_end')->after('date_start_ca');
+            $table->boolean('date_end_ca')->after('date_end');
+        });
+    }
