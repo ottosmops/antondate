@@ -15,6 +15,9 @@ jobs:
         name: P${{ matrix.php }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
 
         steps:
+            - name: Prepare Locales
+              run: sudo locale-gen fr_FR
+
             - name: Checkout code
               uses: actions/checkout@v2
 
