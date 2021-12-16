@@ -110,9 +110,21 @@ class AntonDateTest extends TestCase
 
     public function testComposeYearMonthDayToFormattedGerman()
     {
-        setlocale(LC_ALL, 'de_DE');
-        $actual   = AntonDate::compose('1971', '03', '01')->formatted('de');
+        \App::setLocale('de');
+        $actual   = AntonDate::compose('1971', '03', '01')->formatted();
         $expected = '1. Mär 1971';
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function testFormatDate()
+    {
+        \App::setLocale('de');
+        $actual = AntonDate::createFromString(0)->formatDate(true);
+        $expected = '';
+        $this->assertEquals($expected, $actual);
+
+        $actual = AntonDate::createFromString(0)->formatDate(false);
+        $expected = 'ohne Datum';
         $this->assertEquals($expected, $actual);
     }
 

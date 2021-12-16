@@ -4,7 +4,7 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 [![Tests](https://github.com/ottosmops/antondate/actions/workflows/run-tests.yml/badge.svg)](https://github.com/ottosmops/antondate/actions/workflows/run-tests.yml)
 
-This is where your description should go. Take a look at [contributing.md](contributing.md) to see a to do list.
+Using Dates in Anton ([anton.ch](https://www.anton.ch).
 
 ## Installation
 
@@ -26,19 +26,58 @@ protected $casts = [
 ];
 ```
 
-
 ## Usage
 
+The package covers two ValueObjects: AntonDate, AntonDateInterval (consisting of two AntonDates).
 
+### Create an AntonDate
 
+```php
+AntonDate::createFromString('1995-03-01', 1) : AntonDate
+// ca. 1995-03-01
 
-## Security
+AntonDate::guessFromString('4. Mai 1905') : AntonDate
+// 1905-05-04
 
-If you discover any security related issues, please email author email instead of using the issue tracker.
+AntonDate::compose(1973, 12, 3, 1) : AntonDate
+// ca. 1973-12-03
+
+AntonDate::today() : AntonDate
+```
+
+### Validate
+```php
+AntonDate::isValidString('1997-13-01'); // false
+AntonDate::isValidString('ca. 1997-11-01'); // true
+```
+
+### Get
+```php
+$antondate->toString();
+$antondate->toArray();
+$antondate->formatted();
+$antondate->toMysqlDate();
+$antondate->getCa();
+$antondate->getYear();
+$antondate->getMonth();
+$antondate->getDay();
+```
+
+### Compare
+```
+$antondate->isEqualTo($antondate2, true); // compare with ca
+$antondate->isEqualTo($antondate2); // compare without ca
+$antondate->isGreaterThan($antondate2);
+$antondate->isLessThan($antondate2);
+```
+
+### Rule
+There is also a rule. Which you can use for validation: `AntonDateRule::class`.
+
 
 ## License
 
-license. Please see the [license file](LICENSE.md) for more information.
+MIT. Please see the [license file](LICENSE.md) for more information.
 
 [ico-version]: https://img.shields.io/packagist/v/ottosmops/antondate.svg?style=flat-square
 [ico-downloads]: https://img.shields.io/packagist/dt/ottosmops/antondate.svg?style=flat-square

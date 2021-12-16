@@ -83,7 +83,38 @@ class AntonDateIntervalTest extends TestCase
         $actual = AntonDateInterval::compose('0000-00-00', '0', '2002-07-01', '1')->renderDate();
         $expected = 'pas date – ca. 1<sup>er</sup> juill. 2002';
         $this->assertEquals($expected, $actual);
+    }
 
+    public function test_render_date_only_year()
+    {
+        \App::setLocale('de');
+        $actual = AntonDateInterval::compose('1552-01-03', '0', '1600-03-31', '1')->renderDate(true);
+        $expected = "1552 – ca. 1600";
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function test_render_date_with_no_date_string()
+    {
+        \App::setLocale('de');
+        $actual = AntonDateInterval::compose('1552-11-02', 1, '', 0)->renderDate(true, true);
+        $expected = "ca. 1552 –";
+        $this->assertEquals($expected, $actual);
+
+        $actual = AntonDateInterval::compose('1553-11-02', 1, '', 0)->renderDate(false, true);
+        $expected = "ca. 2. Nov 1553 –";
+        $this->assertEquals($expected, $actual);
+    }
+
+    public function test_render_date_with_no_date()
+    {
+        \App::setLocale('de');
+        $actual = AntonDateInterval::compose('1552-11-02', 1, '', 0)->renderDate(true, false);
+        $expected = "ca. 1552 – ohne Datum";
+        $this->assertEquals($expected, $actual);
+
+        $actual = AntonDateInterval::compose('1553-11-02', 1, '', 0)->renderDate(false, false);
+        $expected = "ca. 2. Nov 1553 – ohne Datum";
+        $this->assertEquals($expected, $actual);
     }
 
 

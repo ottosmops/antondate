@@ -6,9 +6,6 @@ use Ottosmops\Antondate\ValueObjects\AntonDate;
 
 /**
  * AntonDateInterval consists of two AntonDates.
- *
- * @package     Anton
- * @version     1.1.0 (2021-12-09)
  */
 final class AntonDateInterval implements ValueObjectInterface
 {
@@ -60,6 +57,15 @@ final class AntonDateInterval implements ValueObjectInterface
         return new static($AntonDateStart, $AntonDateEnd);
     }
 
+    /**
+     * Compose AntonDateInterval from to AntonDateStrings
+     *
+     * @param string $date_start
+     * @param boolean $date_start_ca
+     * @param string $date_end
+     * @param boolean $date_end_ca
+     * @return self
+     */
     public static function compose(string $date_start, bool $date_start_ca, string $date_end, bool $date_end_ca) : self
     {
         return new static(
@@ -126,7 +132,7 @@ final class AntonDateInterval implements ValueObjectInterface
     public function mysqlDateArray($option = '')
     {
         if ($option == 'nullable') {
-            return array_merge($this->dateInterval, ['date_end'=>null, 'date_end_ca'=>0]);
+            return array_merge($this->dateInterval, ['date_end'=> null, 'date_end_ca'=> 0]);
         }
         return $this->dateInterval;
     }
@@ -171,11 +177,11 @@ final class AntonDateInterval implements ValueObjectInterface
     }
 
     /**
-     * Undocumented function
+     * Returns a rendered date (html)
      *
      * @param boolean $only_year
      * @param boolean $nullable returns an empty string if the date is null/0 etc.
-     * @return void
+     * @return string
      */
     public function renderDate(bool $only_year = false, bool $nullable = false)
     {
@@ -183,20 +189,34 @@ final class AntonDateInterval implements ValueObjectInterface
         $date_end_ca = 0 == $this->AntonDateEnd->getCa() ? '' : trans('antondate::antondate.ca') . ' ';
 
         if ($only_year) {
-            $date_start = $this->AntonDateStart->getYear();
-            $date_end = $this->AntonDateEnd->getYear;
+            if ($nullable) {
+                $date_start = $this->AntonDateStart->getYear() > 0 ? $this->AntonDateStart->getYear() : '';
+                $date_end = $this->AntonDateEnd->getYear() > 0 ? $this->AntonDateEnd->getYear() : '';
+            } else {
+                $date_start = $this->AntonDateStart->getYear() > 0
+                            ? $this->AntonDateStart->getYear()
+                            : trans('antondate::antondate.no_date');
+                $date_end = $this->AntonDateEnd->getYear() > 0
+                          ? $this->AntonDateEnd->getYear() :
+                          trans('antondate::antondate.no_date');
+            }
+        } else {
+            $date_start = $this->AntonDateStart->formatDate($nullable);
+            $date_end = $this->AntonDateEnd->formatDate($nullable);
         }
 
         $html = '';
-        $html = $date_start_ca . $this->AntonDateStart->formatDate($nullable);
+        $html = $date_start_ca . $date_start;
 
         if ($this->AntonDateStart->toMysqlDate() != $this->AntonDateEnd->toMysqlDate() || $date_start_ca != $date_end_ca) {
-            $html .= ' – ' . $date_end_ca . $this->AntonDateEnd->formatDate();
+            $html .= ' – ' . $date_end_ca . $date_end;
         }
 
         $html = str_replace('1er', '1<sup>er</sup>', $html);
         $html = str_replace('juil.', 'juill.', $html);
 
-        return $html;
+        $html = ltrim($html, '– - ');
+
+        return trim($html);
     }
 }

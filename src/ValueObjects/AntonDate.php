@@ -11,9 +11,6 @@ use Ottosmops\Antondate\ValueObjects\ValueObjectInterface;
  * '0000' (meaning, that no date is provided)
  * AntonDate accepts also a 'ca. ' in front of the Date.
  * It is yet not possible to handle BC dates.
- *
- * @package     Anton
- * @version     1.1.0 (2021-12-09)
  */
 final class AntonDate implements ValueObjectInterface
 {
@@ -36,19 +33,20 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a new AntonDate from a date-string
      *
-     * @param  string  $input AntonDateFormat
-     * @param  boolean $ca if $input starts with 'ca. ' or $ca is true the AntonDate contains $ca == 1
+     * @param  string  $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
+     *                 with or wthout a 'ca. ' in front of the date
+     * @param  boolean $ca if $sDate starts with 'ca. ' or $ca is true the AntonDate contains $ca == 1
      * @return object  AntonDate
      */
-    public static function createFromString($input, $ca = 0) : AntonDate
+    public static function createFromString(string $sDate, $ca = 0) : AntonDate
     {
-        $input = $input ?: '0000-00-00';
+        $sDate = $sDate ?: '0000-00-00';
         self::checkBool($ca);
 
-        $sDate = trim($input);
+        $sDate = trim($sDate);
 
         if (!self::isValidString($sDate)) {
-            throw new \InvalidArgumentException("Could not parse string to AntonDate $input");
+            throw new \InvalidArgumentException("Could not parse string to AntonDate $sDate");
         }
 
         if (strpos($sDate, trans('antondate::antondate.ca').' ') === 0) { //
@@ -67,12 +65,12 @@ final class AntonDate implements ValueObjectInterface
     }
 
     /**
-     * guessFromString
+     * Returns a new AntonDate from a date-string which is freely formatted
      *
      * @param string $value
-     * @return self
+     * @return object AntonDate
      */
-    public static function guessFromString(string $value) : self
+    public static function guessFromString(string $value) : AntonDate
     {
         $ca = 0;
         $value = trim($value);
@@ -106,7 +104,7 @@ final class AntonDate implements ValueObjectInterface
     }
 
     /**
-     * Returns a new AntonDate from a year, month and day
+     * Returns a new AntonDate from a year, month, day, and ca
      *
      * @param  str $year  4 digits
      * @param  str $month 2 digits (1-12)
@@ -203,21 +201,23 @@ final class AntonDate implements ValueObjectInterface
      * Returns an associative array.
      * @return array ['year'=> , 'month'=> , 'day'=> , 'ca'=>]
      */
-    public function toArray($ca = true) : array
+    public function toArray(bool $with_ca = true) : array
     {
         $date = [
             'year' => $this->year,
             'month' => $this->month,
             'day' => $this->day
         ];
-        if ($ca) {
-            return array_merge($date, ['ca' => $this->ca]);
+
+        if ($with_ca) {
+            $date['ca'] = $this->ca;
         }
+
         return $date;
     }
 
     /**
-     * Returns a formated string.
+     * Returns a formatted string.
      * https://momentjs.com/
      *
      * @param  string $format_month default: '%b. ' (short month), '%B ' (long month)
@@ -232,7 +232,6 @@ final class AntonDate implements ValueObjectInterface
     {
 
         $string = trans('antondate::antondate.no_date');
-        //$this->toMysqlDate();
         $locale = $locale ?: \App::getLocale();
 
         if ($this->year > 0) {
@@ -484,15 +483,16 @@ final class AntonDate implements ValueObjectInterface
 
     public function formatDate($nullable = false)
     {
-        if ($this->toString() !== '0000-00-00') {
+        if ($this->toString() !== '0000') {
             $html = $this->formatted();
         } else {
             if (!$nullable) {
                 $html = trans('antondate::antondate.no_date');
             } else {
-                return null;
+                return '';
             }
         }
+
         return $html;
     }
 
