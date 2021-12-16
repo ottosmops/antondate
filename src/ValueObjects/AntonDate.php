@@ -33,12 +33,12 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a new AntonDate from a date-string
      *
-     * @param  string  $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
+     * @param  string|null $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
      *                 with or wthout a 'ca. ' in front of the date
      * @param  boolean $ca if $sDate starts with 'ca. ' or $ca is true the AntonDate contains $ca == 1
      * @return object  AntonDate
      */
-    public static function createFromString(string $sDate, $ca = 0) : AntonDate
+    public static function createFromString($sDate, $ca = 0) : AntonDate
     {
         $sDate = $sDate ?: '0000-00-00';
         self::checkBool($ca);
