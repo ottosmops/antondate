@@ -31,7 +31,7 @@ class AntondateServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__.'/../config/antondate.php', 'antondate');
+        //$this->mergeConfigFrom(__DIR__.'/../config/antondate.php', 'antondate');
 
         // Register the service the package provides.
         $this->app->singleton('antondate', function ($app) {
