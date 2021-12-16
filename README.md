@@ -4,7 +4,7 @@
 [![Total Downloads][ico-downloads]][link-downloads]
 [![Tests](https://github.com/ottosmops/antondate/actions/workflows/run-tests.yml/badge.svg)](https://github.com/ottosmops/antondate/actions/workflows/run-tests.yml)
 
-Using Dates in Anton ([anton.ch](https://www.anton.ch).
+Using Dates in Anton ([anton.ch](https://www.anton.ch)).
 
 ## Installation
 
