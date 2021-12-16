@@ -57,9 +57,9 @@ class AntondateServiceProvider extends ServiceProvider
     protected function bootForConsole(): void
     {
         // Publishing the configuration file.
-        $this->publishes([
-            __DIR__.'/../config/antondate.php' => config_path('antondate.php'),
-        ], 'antondate.config');
+        //$this->publishes([
+        //    __DIR__.'/../config/antondate.php' => config_path('antondate.php'),
+        //], 'antondate.config');
 
         // Publishing the views.
         /*$this->publishes([
