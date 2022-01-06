@@ -20,14 +20,11 @@ class AntonDateIntervalCast implements CastsAttributes
      */
     public function get($model, $key, $value, $attributes)
     {
-
         $anton_date_interval =  new AntonDateInterval(
             AntonDate::createFromString($attributes['date_start'], $attributes['date_start_ca']),
             AntonDate::createFromString($attributes['date_end'],$attributes['date_end_ca'])
         );
-        if ($anton_date_interval == '0000') {
-            return '';
-        }
+
         return $anton_date_interval;
     }
 
