@@ -171,9 +171,11 @@ final class AntonDate implements ValueObjectInterface
         }
 
         $year  = $match[1];
+        $month = (int) ($match[2] ?? 0);
+        $day =  (int) ($match[3] ?? 0);
 
-        if (isset($match[2]) && $match[2] > 0 &&  isset($match[3]) && $match[3] > 0 && $year > 0) {
-            return checkdate($match[2], $match[3], $year);
+        if ($month >= 0 && $day > 0 && $year > 0) {
+            return checkdate($month, $day, $year);
         }
 
         if (isset($match[2]) && $year > 0) {

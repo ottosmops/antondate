@@ -9,8 +9,8 @@ class AntonDateTest extends TestCase
 {
     public $validDates = ['0000', '973', '0000-00-00', '1973', '1973-00-00',
                           '1973-01', '1902-12', '1973-01-00', '1973-01-05', 'ca. 1973',
-                          '0000-00-03', '1972-00-04', '973', '-200'];
-    public $invalidDates = ['1973-13', '73-04-01', '1973.00', '02'];
+                          '0000-00-03', '973', '-200'];
+    public $invalidDates = ['1973-13', '73-04-01', '1973.00', '02','1977-00-01'];
 
     public function testAntonDatesAreValid()
     {
