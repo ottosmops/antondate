@@ -245,10 +245,10 @@ final class AntonDate implements ValueObjectInterface
 
             switch ($format) {
                 case 'Y':
-                    $string = Carbon::createFromFormat('Y', static::cleanDate($this->toMysqlDate()))->locale($locale)->isoFormat($format_y);
+                    $string = Carbon::createFromFormat('Y-m-d', static::cleanDate($this->toMysqlDate()).'-01-01')->locale($locale)->isoFormat($format_y);
                     break;
                 case 'Y-m':
-                    $string = Carbon::createFromFormat('Y-m', static::cleanDate($this->toMysqlDate()))->locale($locale)->isoFormat($format_m);
+                    $string = Carbon::createFromFormat('Y-m-d', static::cleanDate($this->toMysqlDate()).'-01')->locale($locale)->isoFormat($format_m);
                     break;
                 default:
                     $string = Carbon::createFromFormat('Y-m-d', static::cleanDate($this->toMysqlDate()))->locale($locale)->isoFormat($format_d);

@@ -85,6 +85,13 @@ class AntonDateTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testComposeYearMonthToFormattedWithFebruar()
+    {
+        $actual   = AntonDate::compose('1971', '02')->formatted('en', '', 'MMMM YYYY');
+        $expected = 'February 1971';
+        $this->assertEquals($expected, $actual);
+    }
+
      public function testComposeYearMonthDayToFormattedFrench()
      {
         $this->setLocale(LC_ALL, 'fr_FR');
