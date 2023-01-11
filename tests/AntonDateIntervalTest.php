@@ -103,6 +103,10 @@ class AntonDateIntervalTest extends TestCase
         $actual = AntonDateInterval::compose('1553-11-02', 1, '', 0)->renderDate(false, true);
         $expected = "ca. 2. Nov 1553 –";
         $this->assertEquals($expected, $actual);
+
+        $actual = AntonDateInterval::compose('', 0, '1553-11-02', 0)->renderDate(false, true);
+        $expected = "– 2. Nov 1553";
+        $this->assertEquals($expected, $actual);
     }
 
     public function test_render_date_with_no_date()

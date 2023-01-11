@@ -215,8 +215,6 @@ final class AntonDateInterval implements ValueObjectInterface
         $html = str_replace('1er', '1<sup>er</sup>', $html);
         $html = str_replace('juil.', 'juill.', $html);
 
-        $html = ltrim($html, '– - ');
-
         return trim($html);
     }
 }
