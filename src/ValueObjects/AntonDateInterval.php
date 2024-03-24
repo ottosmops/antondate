@@ -11,19 +11,18 @@ final class AntonDateInterval implements ValueObjectInterface
 {
     //const DATE_PATTERN = '((?:ca. )?(?:\d{3,4}(?:-\d{2})?(?:-\d{2})?))';
     const DATE_INTERVAL_PATTERN = AntonDate::ANTON_DATE_PATTERN .'[/-]'.AntonDate::ANTON_DATE_PATTERN;
-    /* @var Antondate */
-    private $date_start;
 
-    /* @var Antondate */
-    private $date_end;
+    public AntonDate $AntonDateStart;
+
+    public AntonDate $AntonDateEnd;
 
     /**
      * [createFromString description]
      * @param  string $string    eg. 'ca. 1984/1986-12-03'
      * @param  string $separator '/' by default
-     * @return obj               AntonDateInterval
+     * @return static             AntonDateInterval
      */
-    public static function createFromString($string = '', $separator = '/')
+    public static function createFromString($string = '', $separator = '/') : static
     {
         $dateIntervalString = trim($string); // work with $datestring
 
@@ -44,7 +43,7 @@ final class AntonDateInterval implements ValueObjectInterface
             throw new \InvalidArgumentException("Could not parse string to AntonDate (could not initiate a AntonStartDate) $string");
         }
 
-        if (isset($date_end)) {
+        if ($date_end) {
             if (AntonDate::isValidString($date_end)) {
                 $AntonDateEnd = AntonDate::createFromString($date_end);
             } else {
@@ -78,9 +77,9 @@ final class AntonDateInterval implements ValueObjectInterface
      * isValid checks if a given dateInterval is valid
      * @param  string  $value     dateInterval
      * @param  string  $separator '/' by default
-     * @return boolean
+     * @return bool
      */
-    public static function isValidString($value, $separator = '/')
+    public static function isValidString($value, $separator = '/') : bool
     {
         if (!preg_match('#' . self::DATE_INTERVAL_PATTERN . '#', $value)) {
             return false;
@@ -90,6 +89,9 @@ final class AntonDateInterval implements ValueObjectInterface
         } else {
             list($date_start, $date_end) =  explode('/', $value);
         }
+        if (!$date_end) {
+            return false;
+        }
 
         if (AntonDate::isValidString($date_start)) {
             $antonDateStart = AntonDate::createFromString($date_start);
@@ -97,19 +99,15 @@ final class AntonDateInterval implements ValueObjectInterface
             return false;
         }
 
-        if (isset($date_end)) {
-            if (AntonDate::isValidString($date_end)) {
-                $antonDateEnd = AntonDate::createFromString($date_end);
-            } else {
-                return false;
-            }
+        if (AntonDate::isValidString($date_end)) {
+            $antonDateEnd = AntonDate::createFromString($date_end);
         } else {
-            $date_end = '0000-00-00';
+            return false;
         }
 
         $isValid = $antonDateStart->isLessThan($antonDateEnd)
                 || $antonDateStart->isEqualTo($antonDateEnd)
-                || (AntonDate::isValidString($date_start) && $date_end == '0000-00-00');
+                || $date_end == '0000-00-00';
         return $isValid;
     }
 
@@ -129,44 +127,46 @@ final class AntonDateInterval implements ValueObjectInterface
         return $str;
     }
 
-    public function mysqlDateArray($option = '')
-    {
-        if ($option == 'nullable') {
-            return array_merge($this->dateInterval, ['date_end'=> null, 'date_end_ca'=> 0]);
-        }
-        return $this->dateInterval;
-    }
-
-    public function dateStartCa()
+    public function dateStartCa() : int
     {
         return $this->AntonDateStart->getCa();
     }
 
-    public function dateEndCa()
+    public function dateEndCa() : int
     {
         return $this->AntonDateEnd->getCa();
     }
 
-    public function mysqlDateStart()
+    public function mysqlDateStart() : string
     {
         return $this->AntonDateStart->toMysqlDate();
     }
 
-    public function mysqlDateEnd($option = '')
+    public function mysqlDateEnd(string $option = '') : string|null
     {
-        if (($option == 'nullable') && ($this->dateInterval['date_end'] == '0000-00-00')) {
+        if (($option == 'nullable') && ($this->AntonDateEnd->toMysqlDate() == '0000-00-00')) {
             return null;
         }
         return $this->AntonDateEnd->toMysqlDate();
     }
 
+    /**
+     * AntonDateInterval constructor.
+     *
+     * @param AntonDate $AntonDateStart
+     * @param AntonDate $AntonDateEnd
+     */
     public function __construct(AntonDate $AntonDateStart, AntonDate $AntonDateEnd)
     {
         $this->AntonDateStart = $AntonDateStart;
         $this->AntonDateEnd = $AntonDateEnd;
     }
 
-    public function toArray()
+    /**
+     * Returns the dateInterval as an array
+     * @return array<string|int>
+     */
+    public function toArray() : array
     {
          return [
              'date_start' => $this->AntonDateStart->toMysqlDate(),
@@ -183,7 +183,7 @@ final class AntonDateInterval implements ValueObjectInterface
      * @param boolean $nullable returns an empty string if the date is null/0 etc.
      * @return string
      */
-    public function renderDate(bool $only_year = false, bool $nullable = false)
+    public function renderDate(bool $only_year = false, bool $nullable = false) : string
     {
         $date_start_ca = 0 == $this->AntonDateStart->getCa() ? '' : trans('antondate::antondate.ca') . ' ';
         $date_end_ca = 0 == $this->AntonDateEnd->getCa() ? '' : trans('antondate::antondate.ca') . ' ';

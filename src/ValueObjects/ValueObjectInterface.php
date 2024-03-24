@@ -7,13 +7,13 @@ interface ValueObjectInterface
     /**
      * Create a object from the PHP native value.
      *
-     * @return obj
+     * @return static
      */
     public static function createFromString(string $value);
 
     /**
      * Validates the string representation of the value.
-     * @param  mixed  $value
+     * @param  string $value
      * @return boolean
      */
     public static function isValidString(string $value);
@@ -21,7 +21,7 @@ interface ValueObjectInterface
     /**
      * Returns the value of the object
      *
-     * @return mixed
+     * @return string
      */
     public function toString();
 

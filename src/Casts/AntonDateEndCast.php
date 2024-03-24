@@ -14,10 +14,10 @@ class AntonDateEndCast implements CastsAttributes
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
      * @param  mixed  $value
-     * @param  array  $attributes
-     * @return Anton\ValueObjects\AntonDate;
+     * @param  array<string|int|bool>  $attributes
+     * @return AntonDate;
      */
-    public function get($model, $key, $value, $attributes)
+    public function get($model, $key, $value, $attributes) : AntonDate
     {
         return AntonDate::createFromString(
             $attributes['date_end'] ?? '0000',
@@ -30,17 +30,17 @@ class AntonDateEndCast implements CastsAttributes
      *
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
-     * @param  AntonDate $value
-     * @param  array  $attributes
-     * @return array
+     * @param  ?AntonDate $value
+     * @param  array<string|int|bool>   $attributes
+     * @return array<string|int|bool>
      */
-    public function set($model, $key, $value, $attributes)
+    public function set($model, $key, $value, $attributes) : array
     {
         /*
          * We'll need this to handle nullable columns
          */
         if (is_null($value)) {
-            return;
+            return [];
         }
 
         if (!$value instanceof AntonDate) {

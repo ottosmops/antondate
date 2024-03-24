@@ -82,15 +82,15 @@ class DateHelper
         return $html;
     }
 
-    public static function formatDate($str, $nullable = false)
+    public static function formatDate(string $string, bool $nullable = false): ?string
     {
-        if ('0000-00-00 00:00:00' != $str
-             && '-0001-11-30 00:00:00' != $str
-             && null != $str
-             && '0000-00-00' != $str
-             && '-0001' != $str) {
-            //$html = $str .' :: ';
-            $html = AntonDate::compose($str)->formatted();
+        if ('0000-00-00 00:00:00' != $string
+             && '-0001-11-30 00:00:00' != $string
+             && null != $string
+             && '0000-00-00' != $string
+             && '-0001' != $string) {
+            //$html = $string .' :: ';
+            $html = AntonDate::compose($string)->formatted();
         } else {
             if (!$nullable) {
                 $html = trans('messages.no_date');
@@ -120,35 +120,35 @@ class DateHelper
     /**
      * [year description]
      * @param  string $date 2003-01-03
-     * @return string       2003
+     * @return ?string       2003
      */
-    public static function year($date)
+    public static function year(string $date) : ?string
     {
         if (self::checkIsoDate($date)) {
             return date("Y", strtotime($date));
         }
-        return false;
+        return null;
     }
 
-    public static function cleanDate($datestring)
+    public static function cleanDate(string $datestring): string
     {
         $datestring = preg_replace('/(-00$)/', '', $datestring);
         $datestring = preg_replace('/(-00$)/', '', $datestring);
         return $datestring;
     }
 
-    public static function composeDate($year = 0, $month = 0, $day = 0)
+    public static function composeDate(int $year = 0, int $month = 0, int $day = 0): string
     {
         $date = '';
 
         $year = ($year >= 1 && $year <= 2100) ? $year : 0;
-        $date .= str_pad($year, 4, "0", STR_PAD_LEFT);
+        $date .= str_pad((string) $year, 4, "0", STR_PAD_LEFT);
 
         $month = ($month >= 1 && $month <= 12) ? $month : 0;
-        $date .= '-' . str_pad($month, 2, "0", STR_PAD_LEFT);
+        $date .= '-' . str_pad((string) $month, 2, "0", STR_PAD_LEFT);
 
         $day = ($day >= 1 && $day <= 31) ? $day : 0;
-        $date .= '-' . str_pad($day, 2, "0", STR_PAD_LEFT);
+        $date .= '-' . str_pad((string) $day, 2, "0", STR_PAD_LEFT);
 
         return $date;
     }
@@ -165,16 +165,15 @@ class DateHelper
      * @author  ak
      * @version 1.0 | 2014-01-15
      *
-     * @param   string  $isodate zu ueberpruefendes ISO Datum
+     * @param   string  $isoDate zu ueberpruefendes ISO Datum
      * @return  bool
      *
      */
-    public static function checkIsoDate($isoDate)
+    public static function checkIsoDate(string $isoDate) : bool
     {
         $return = false;
-
         if (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $isoDate, $parts)) {
-            if (checkdate($parts[2], $parts[3], $parts[1])) {
+            if (checkdate((int) $parts[2], (int) $parts[3], (int) $parts[1])) {
                 $return = true;
             }
         }

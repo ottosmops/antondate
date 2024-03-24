@@ -3,6 +3,7 @@
 namespace Ottosmops\Antondate\Casts;
 
 use InvalidArgumentException;
+use Illuminate\Database\Eloquent\Model;
 use Ottosmops\Antondate\ValueObjects\AntonDate;
 use Illuminate\Contracts\Database\Eloquent\CastsAttributes;
 
@@ -11,13 +12,13 @@ class AntonDateStartCast implements CastsAttributes
     /**
      * Cast the given value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  mixed $model
      * @param  string  $key
      * @param  mixed  $value
-     * @param  array  $attributes
+     * @param  array<string|int|bool>  $attributes
      * @return AntonDate;
      */
-    public function get($model, $key, $value, $attributes)
+    public function get(mixed $model, string $key, mixed $value, array $attributes) : AntonDate
     {
         return AntonDate::createFromString(
             $attributes['date_start'] ?? '0000',
@@ -30,17 +31,17 @@ class AntonDateStartCast implements CastsAttributes
      *
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @param  string  $key
-     * @param  AntonDate $value
-     * @param  array  $attributes
-     * @return array
+     * @param  ?AntonDate $value
+     * @param  array<string|int|bool>  $attributes
+     * @return array<string|int|bool>
      */
-    public function set($model, $key, $value, $attributes)
+    public function set($model, $key, $value, $attributes) : array
     {
         /*
          * We'll need this to handle nullable columns
          */
         if (is_null($value)) {
-            return;
+            return [];
         }
 
         if (!$value instanceof AntonDate) {

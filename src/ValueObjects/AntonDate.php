@@ -17,13 +17,13 @@ final class AntonDate implements ValueObjectInterface
     /** @const Regex for a AntonDateString */
     const ANTON_DATE_PATTERN = '(?:ca. )?(?:(-?\d{3,4})(?:-(\d{2}))?(?:-(\d{2}))?)';
 
-    private $year = 0;
+    private int $year = 0;
 
-    private $month = 0;
+    private int $month = 0;
 
-    private $day = 0;
+    private int $day = 0;
 
-    private $ca = 0;
+    private bool|int|null $ca = 0;
 
 
     // ********************
@@ -33,12 +33,13 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a new AntonDate from a date-string
      *
-     * @param  string|null $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
+     * @param  ?string $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
      *                 with or wthout a 'ca. ' in front of the date
-     * @param  boolean $ca if $sDate starts with 'ca. ' or $ca is true the AntonDate contains $ca == 1
-     * @return object  AntonDate
+     * @param  bool|int $ca if $sDate starts with 'ca. ' or $ca is true the AntonDate contains $ca == 1
+     *
+     * @return static
      */
-    public static function createFromString($sDate, $ca = 0) : AntonDate
+    public static function createFromString(?string $sDate, bool|int $ca = 0) : static
     {
         $sDate = $sDate ?: '0000-00-00';
         self::checkBool($ca);
@@ -66,11 +67,12 @@ final class AntonDate implements ValueObjectInterface
 
     /**
      * Returns a new AntonDate from a date-string which is freely formatted
+     * This need a major refactoring (invalid datestrings are not really handled and not tested)
      *
      * @param string $value
-     * @return object AntonDate
+     * @return static
      */
-    public static function guessFromString(string $value) : AntonDate
+    public static function guessFromString(string $value) : static
     {
         $ca = 0;
         $value = trim($value);
@@ -96,6 +98,11 @@ final class AntonDate implements ValueObjectInterface
                     $month = $k;
                 }
             }
+
+            if (!isset($month)) {
+                throw new \InvalidArgumentException('Could not determine month from string: ' . $value);
+            }
+
             $year  = $matches[3];
             $value = date('Y-m-d', strtotime("$day-$month-$year"));
         }
@@ -106,12 +113,13 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a new AntonDate from a year, month, day, and ca
      *
-     * @param  str $year  4 digits
-     * @param  str $month 2 digits (1-12)
-     * @param  str $day   2 digits (1-31)
-     * @return obj returns an AntonDate-Object
+     * @param  ?string $year  4 digits
+     * @param  ?string $month 2 digits (1-12)
+     * @param  ?string $day   2 digits (1-31)
+     * @param  boolean|int $ca
+     * @return static returns an AntonDate-Object
      */
-    public static function compose($year = '0000', $month = '00', $day = '00', $ca = 0) : AntonDate
+    public static function compose(?string $year = '0000', ?string $month = '00', ?string $day = '00', $ca = false) : static
     {
         self::checkBool($ca);
         $aDate['year']  = (int) $year; //str_pad($year, 4, "0", STR_PAD_LEFT);
@@ -124,9 +132,9 @@ final class AntonDate implements ValueObjectInterface
 
     /**
      * Returns a new AntonDate for today.
-     * @return obj returns an AntonDate-Object
+     * @return static returns an AntonDate-Object
      */
-    public static function today() : AntonDate
+    public static function today() : static
     {
         $today = date('Y-m-d');
         return self::createFromString($today);
@@ -149,10 +157,10 @@ final class AntonDate implements ValueObjectInterface
      * Valid: 000-00-01, 0000-02-01
      * Invalid: 0000-00, 0000-01, 1934-00-01
      *
-     * @param  string  $date
-     * @return boolean
+     * @param  string  $sDate
+     * @return bool
      */
-    public static function isValidString(string $sDate)
+    public static function isValidString(string $sDate) : bool
     {
         $date = trim($sDate);
 
@@ -170,7 +178,7 @@ final class AntonDate implements ValueObjectInterface
             return false;
         }
 
-        $year  = $match[1];
+        $year  = (int) $match[1];
         $month = (int) ($match[2] ?? 0);
         $day =  (int) ($match[3] ?? 0);
 
@@ -201,7 +209,9 @@ final class AntonDate implements ValueObjectInterface
 
     /**
      * Returns an associative array.
-     * @return array ['year'=> , 'month'=> , 'day'=> , 'ca'=>]
+     *
+     * @param  bool $with_ca
+     * @return array<int|bool> ['year'=> , 'month'=> , 'day'=> , 'ca'=>]
      */
     public function toArray(bool $with_ca = true) : array
     {
@@ -221,8 +231,13 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a formatted string.
      * https://momentjs.com/
+     * default: '%b. ' (short month), '%B ' (long month)
      *
-     * @param  string $format_month default: '%b. ' (short month), '%B ' (long month)
+     * @param  string $locale
+     * @param  string $format_y
+     * @param  string $format_m
+     * @param  string $format_d
+     *
      * @return string "4. Mar 1971"
      */
     public function formatted(
@@ -241,7 +256,7 @@ final class AntonDate implements ValueObjectInterface
 
             list($y, $m, $d) = $arr;
 
-            $format = self::getDateFormat($this->toMysqlDate());
+            $format = self::getDateFormat();
 
             switch ($format) {
                 case 'Y':
@@ -262,15 +277,14 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a date for storage in a mysql-db
      *
-     * @param  string $date 1947 or 1947-02-11
      * @return string date in iso-format or 0000-00-00
      */
     public function toMysqlDate() : string
     {
         $str = self::cleanDate(
-            str_pad($this->getYear(),  4, "0", STR_PAD_LEFT) . '-' .
-            str_pad($this->getMonth(), 2, "0", STR_PAD_LEFT) . '-' .
-            str_pad($this->getDay(),   2, "0", STR_PAD_LEFT)
+            str_pad((string) $this->getYear(),  4, "0", STR_PAD_LEFT) . '-' .
+            str_pad((string) $this->getMonth(), 2, "0", STR_PAD_LEFT) . '-' .
+            str_pad((string) $this->getDay(),   2, "0", STR_PAD_LEFT)
         );
         return (string) self::addZeros($str);
     }
@@ -285,9 +299,9 @@ final class AntonDate implements ValueObjectInterface
         $str = '';
         $str .= self::translateCa($this->ca);
         $str .= self::cleanDate(
-            str_pad($this->getYear(),  4, "0", STR_PAD_LEFT) . '-' .
-            str_pad($this->getMonth(), 2, "0", STR_PAD_LEFT) . '-' .
-            str_pad($this->getDay(),   2, "0", STR_PAD_LEFT)
+            str_pad((string) $this->getYear(),  4, "0", STR_PAD_LEFT) . '-' .
+            str_pad((string) $this->getMonth(), 2, "0", STR_PAD_LEFT) . '-' .
+            str_pad((string) $this->getDay(),   2, "0", STR_PAD_LEFT)
         );
 
         return (string) $str;
@@ -334,8 +348,8 @@ final class AntonDate implements ValueObjectInterface
 
     /**
      * @param  AntonDate $date
-     * @param  boolean $strict: $this->ca is evaluated
-     * @return boolean
+     * @param  bool $strict: $this->ca is evaluated
+     * @return bool
      */
     public function isEqualTo(AntonDate $date, bool $strict = false) : bool
     {
@@ -347,7 +361,7 @@ final class AntonDate implements ValueObjectInterface
 
     /**
      * @param  AntonDate $date
-     * @return boolean
+     * @return bool
      */
     public function isGreaterThan(AntonDate $date) : bool
     {
@@ -359,7 +373,7 @@ final class AntonDate implements ValueObjectInterface
 
     /**
      * @param  AntonDate $date
-     * @return boolean
+     * @return bool
      */
     public function isLessThan(AntonDate $date) : bool
     {
@@ -370,17 +384,13 @@ final class AntonDate implements ValueObjectInterface
         return $this->toInteger() < $date->toInteger();
     }
 
-    // ******************
-    // private functions
-    // ******************
-
      /**
      * Create a new Date
      * [year  => JJJJ
      *  month => mm
      *  day => dd
      *  ca => 1]
-     * @param object $date new validated AntonDate
+     * @param array<int|bool> $date
      */
     public function __construct(array $date)
     {
@@ -393,11 +403,11 @@ final class AntonDate implements ValueObjectInterface
 
     /**
      * Validate AntonDate
-     * @param  string $value expected to be an AntonDate
+     *
      * @throws \InvalidArgumentException
      * @return void
      */
-    private function validate()
+    private function validate() : void
     {
         if (!AntonDate::isValidString($this->toString())) {
             throw new \InvalidArgumentException(sprintf('AntonDate is not valid: (%s, %s, %s, %s).',
@@ -411,7 +421,7 @@ final class AntonDate implements ValueObjectInterface
      *
      * @return string 'Y-m-d', 'Y-m' or'Y'
      */
-    private function getDateFormat()
+    private function getDateFormat() : string
     {
         if ($this->getYear() > 0 && $this->getMonth() == 0 && $this->getDay() == 0) {
             return 'Y';
@@ -433,7 +443,7 @@ final class AntonDate implements ValueObjectInterface
      * @param  string $datestring
      * @return string
      */
-    private static function cleanDate($datestring)
+    private static function cleanDate($datestring) : string
     {
         $datestring = trim($datestring);
         $datestring = preg_replace('/(-00$)/', '', $datestring);
@@ -446,8 +456,9 @@ final class AntonDate implements ValueObjectInterface
      * AntonDate to MysqlDate (1973 --> 1973-00-00)
      *
      * @param string $datestring [description]
+     * @return string
      */
-    private static function addZeros($datestring)
+    private static function addZeros($datestring) : string
     {
         $with_zeros = $datestring;
 
@@ -463,47 +474,58 @@ final class AntonDate implements ValueObjectInterface
     }
 
     /**
-     * @return string "19710304"
+     * @return int 19710304
      */
-    private function toInteger()
+    private function toInteger() : int
     {
         return (int) str_replace('-', '', $this->toMysqlDate());
     }
 
-    private static function translateCa($ca)
+    private static function translateCa(mixed $ca) : string
     {
         return ($ca == 1) ? trans('antondate::antondate.ca').' ' : '';
     }
 
-    private static function checkBool($ca)
+    /**
+     * @param mixed $ca
+     * @throws \InvalidArgumentException
+     */
+    private static function checkBool(mixed $ca) : void
     {
-        if (in_array($ca, ['1', '0', 1, 0, true, false])) {
-            return true;
+        if (!in_array($ca, ['1', '0', 1, 0, true, false])) {
+            throw new \InvalidArgumentException('AntonDate is not valid: ' . $ca . ' is not boolean.');
         }
-        throw new \InvalidArgumentException('AntonDate is not valid: ' . $ca .' is not boolean.');
     }
 
-    public function formatDate($nullable = false)
+    /**
+     * Returns a rendered date
+     */
+    public function formatDate(bool $nullable = false) : string
     {
         if ($this->toString() !== '0000') {
-            $html = $this->formatted();
+            $string = $this->formatted();
         } else {
             if (!$nullable) {
-                $html = trans('antondate::antondate.no_date');
+                $string = trans('antondate::antondate.no_date');
             } else {
                 return '';
             }
         }
 
-        return $html;
+        return $string;
     }
 
-    private static function getMonths()
+    /**
+     * Returns an array with the months in german
+     *
+     * @return array<string>
+     */
+    private static function getMonths() : array
     {
-        $months = [];
         for ( $i = 1; $i <= 12; $i++ ) {
-            $months[$i] = date_format(date_create('2000-'.str_pad($i, 2, 0, STR_PAD_LEFT).'-01'), 'F');
+            $months[$i] = date_format(date_create('2000-'.str_pad((string) $i, 2, '0', STR_PAD_LEFT).'-01'), 'F');
         }
+
         return $months;
     }
 }

@@ -12,17 +12,17 @@ class AntonDateIntervalCast implements CastsAttributes
     /**
      * Cast the given value.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  mixed  $model
      * @param  string  $key
      * @param  mixed  $value
-     * @param  array  $attributes
+     * @param  array<string|int|bool>  $attributes
      * @return AntonDateInterval;
      */
-    public function get($model, $key, $value, $attributes)
+    public function get($model, $key, $value, $attributes) : AntonDateInterval
     {
         $anton_date_interval =  new AntonDateInterval(
-            AntonDate::createFromString($attributes['date_start'], $attributes['date_start_ca']),
-            AntonDate::createFromString($attributes['date_end'],$attributes['date_end_ca'])
+            AntonDate::createFromString((string) $attributes['date_start'], (bool) $attributes['date_start_ca']),
+            AntonDate::createFromString((string) $attributes['date_end'], (bool) $attributes['date_end_ca'])
         );
 
         return $anton_date_interval;
@@ -31,13 +31,13 @@ class AntonDateIntervalCast implements CastsAttributes
     /**
      * Prepare the given value for storage.
      *
-     * @param  \Illuminate\Database\Eloquent\Model  $model
+     * @param  mixed  $model
      * @param  string  $key
-     * @param  Anton\AntonDateInterval $value
-     * @param  array  $attributes
-     * @return array
+     * @param  AntonDateInterval $value
+     * @param  array<string|int|bool>  $attributes
+     * @return array<string|int|bool>
      */
-    public function set($model, $key, $value, $attributes)
+    public function set($model, $key, $value, $attributes) : array
     {
         if (!$value instanceof AntonDateInterval) {
             throw new InvalidArgumentException(

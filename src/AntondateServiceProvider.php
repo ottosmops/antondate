@@ -3,6 +3,7 @@
 namespace Ottosmops\Antondate;
 
 use Illuminate\Support\ServiceProvider;
+use Ottosmops\Antondate\ValueObjects\AntonDate;
 
 class AntondateServiceProvider extends ServiceProvider
 {
@@ -34,17 +35,17 @@ class AntondateServiceProvider extends ServiceProvider
         //$this->mergeConfigFrom(__DIR__.'/../config/antondate.php', 'antondate');
 
         // Register the service the package provides.
-        $this->app->singleton('antondate', function ($app) {
-            return new Antondate;
-        });
+        //$this->app->singleton('antondate', function ($app) {
+        //    return new AntonDate;
+        //});
     }
 
     /**
      * Get the services provided by the provider.
      *
-     * @return array
+     * @return array<string>
      */
-    public function provides()
+    public function provides() : array
     {
         return ['antondate'];
     }
