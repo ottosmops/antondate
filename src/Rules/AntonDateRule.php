@@ -29,6 +29,9 @@ class AntonDateRule implements Rule
         if ($value instanceof AntonDate) {
             return true;
         }
+        if (!is_string($value)) {
+            return false;
+        }
         try {
             AntonDate::createFromString($value);
         } catch (\InvalidArgumentException $e) {
