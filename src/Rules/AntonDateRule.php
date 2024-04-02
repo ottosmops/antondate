@@ -2,6 +2,7 @@
 
 namespace Ottosmops\Antondate\Rules;
 
+use DateTimeImmutable;
 use Illuminate\Contracts\Validation\Rule;
 use Ottosmops\Antondate\ValueObjects\AntonDate;
 
@@ -27,6 +28,9 @@ class AntonDateRule implements Rule
     public function passes($attribute, $value)
     {
         if ($value instanceof AntonDate) {
+            return true;
+        }
+        if ($value instanceOf DateTimeImmutable) {
             return true;
         }
         if (!is_string($value)) {

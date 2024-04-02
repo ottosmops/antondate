@@ -3,6 +3,7 @@
 namespace Ottosmops\Antondate\ValueObjects;
 
 use Carbon\Carbon;
+use DateTimeImmutable;
 use Ottosmops\Antondate\ValueObjects\ValueObjectInterface;
 
 /**
@@ -33,14 +34,21 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a new AntonDate from a date-string
      *
-     * @param  ?string $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
+     * @param  string|AntonDate|DateTimeImmutable $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
      *                 with or wthout a 'ca. ' in front of the date
      * @param  bool|int $ca if $sDate starts with 'ca. ' or $ca is true the AntonDate contains $ca == 1
      *
      * @return static
      */
-    public static function createFromString(?string $sDate, bool|int $ca = 0) : static
+    public static function createFromString(string|AntonDate|DateTimeImmutable $sDate, bool|int $ca = 0) : static
     {
+        if ($sDate instanceof AntonDate) {
+            return $sDate;
+        }
+        if ($sDate instanceof DateTimeImmutable) {
+            return static:: createFromString($sDate->format('Y-m-d'));
+        }
+
         $sDate = $sDate ?: '0000-00-00';
         self::checkBool($ca);
 
