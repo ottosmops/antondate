@@ -219,4 +219,11 @@ class AntonDateTest extends TestCase
         $expected = '2014-04-02';
         $this->assertEquals($expected, $actual);
     }
+
+    public function testNullCreateFromString() : void
+    {
+        $actual = AntonDate::createFromString(null)->formatted();
+        $expected = 'no date';
+        $this->assertEquals($expected, $actual);
+    }
 }
