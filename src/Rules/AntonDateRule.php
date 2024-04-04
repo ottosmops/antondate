@@ -33,6 +33,9 @@ class AntonDateRule implements Rule
         if ($value instanceOf DateTimeImmutable) {
             return true;
         }
+        if (is_int($value)) {
+            $value = (string) $value;
+        }
         if (!is_string($value)) {
             return false;
         }
