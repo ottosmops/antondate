@@ -34,13 +34,13 @@ final class AntonDate implements ValueObjectInterface
     /**
      * Returns a new AntonDate from a date-string
      *
-     * @param  string|integer|null|AntonDate|DateTimeImmutable $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
+     * @param  string|int|null|AntonDate|DateTimeImmutable $sDate in AntonDateFormat 'Y-m-d', 'Y-m', 'Y' or '0000'
      *                 with or wthout a 'ca. ' in front of the date
      * @param  bool|int $ca if $sDate starts with 'ca. ' or $ca is true the AntonDate contains $ca == 1
      *
      * @return static
      */
-    public static function createFromString(string|AntonDate|DateTimeImmutable|null $sDate, bool|int $ca = 0) : static
+    public static function createFromString(string|int|null|AntonDate|DateTimeImmutable $sDate, bool|int $ca = 0) : static
     {
         if ($sDate instanceof AntonDate) {
             return $sDate;
@@ -49,7 +49,7 @@ final class AntonDate implements ValueObjectInterface
             return static::createFromString($sDate->format('Y-m-d'));
         }
         if (is_int($sDate)) {
-            $sDate = (string) $sDate;
+            return static::createFromString((string) $sDate);
         }
 
         $sDate = $sDate ?: '0000-00-00';
