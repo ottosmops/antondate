@@ -207,16 +207,21 @@ class AntonDateTest extends TestCase
 
     public function testGuessDateFromString() : void
     {
-        $actual = AntonDate::guessFromString('2. April 2014');
-        $expected = '2014-04-02';
+
+        $actual = AntonDate::guessFromString('2. Oktober 2014');
+        $expected = '2014-10-02';
+        $this->assertEquals($expected, $actual);
+
+        $actual = AntonDate::guessFromString('ca. 23. Oktober 2014');
+        $expected = 'ca. 2014-10-23';
         $this->assertEquals($expected, $actual);
 
         $actual = AntonDate::guessFromString('2.4.2014');
         $expected = '2014-04-02';
         $this->assertEquals($expected, $actual);
 
-        $actual = AntonDate::guessFromString('2. Apr. 2014');
-        $expected = '2014-04-02';
+        $actual = AntonDate::guessFromString('2. Okt. 2014');
+        $expected = '2014-10-02';
         $this->assertEquals($expected, $actual);
     }
 

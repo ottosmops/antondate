@@ -2,8 +2,9 @@
 
 namespace Ottosmops\Antondate\ValueObjects;
 
-use Carbon\Carbon;
 use DateTimeImmutable;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\Carbon;
 use Ottosmops\Antondate\ValueObjects\ValueObjectInterface;
 
 /**
@@ -88,9 +89,9 @@ final class AntonDate implements ValueObjectInterface
         $ca = 0;
         $value = trim($value);
 
-        if (strpos($value, trans('messages.ca').' ') === 0) { //
+        if (str_starts_with($value, trans('antondate::antondate.ca').' ')) { //
             $ca = 1;
-            $value = str_replace(trans('messages.ca'), '', $value);
+            $value = str_replace(trans('antondate::antondate.ca'), '', $value);
             $value = trim($value);
         }
 
@@ -531,10 +532,11 @@ final class AntonDate implements ValueObjectInterface
      *
      * @return array<string>
      */
-    private static function getMonths() : array
+    private static function getMonths($locale = 'de') : array
     {
-        for ( $i = 1; $i <= 12; $i++ ) {
-            $months[$i] = date_format(date_create('2000-'.str_pad((string) $i, 2, '0', STR_PAD_LEFT).'-01'), 'F');
+        $months = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $months[$i] = CarbonImmutable::create(null, $i, 1)->locale($locale)->translatedFormat('F');
         }
 
         return $months;
