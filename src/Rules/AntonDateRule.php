@@ -11,9 +11,10 @@ class AntonDateRule implements Rule
     /**
      * Create a new rule instance.
      *
+     * @param  bool  $strict  If true, uses createFromString (strict parsing), otherwise guessFromString
      * @return void
      */
-    public function __construct()
+    public function __construct(protected bool $strict = true)
     {
         //
     }
@@ -40,7 +41,11 @@ class AntonDateRule implements Rule
             return false;
         }
         try {
-            AntonDate::createFromString($value);
+            if ($this->strict) {
+                AntonDate::createFromString($value);
+            } else {
+                AntonDate::guessFromString($value);
+            }
         } catch (\InvalidArgumentException $e) {
             return false;
         }

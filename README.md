@@ -72,7 +72,18 @@ $antondate->isLessThan($antondate2);
 ```
 
 ### Rule
-There is also a rule. Which you can use for validation: `AntonDateRule::class`.
+There is also a rule which you can use for validation:
+
+```php
+use Ottosmops\Antondate\Rules\AntonDateRule;
+
+// Strict mode (default) - uses AntonDate::createFromString()
+new AntonDateRule()
+new AntonDateRule(strict: true)
+
+// Non-strict mode - uses AntonDate::guessFromString()
+new AntonDateRule(strict: false)
+```
 
 
 ## License
