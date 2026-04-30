@@ -242,4 +242,67 @@ class AntonDateTest extends TestCase
         $expected = '0500';
         $this->assertEquals($expected, $actual);
     }
+
+    public function testToLowerBoundInteger() : void
+    {
+        $this->assertSame(0, AntonDate::createFromString('0000')->toLowerBoundInteger());
+        $this->assertSame(19230101, AntonDate::createFromString('1923')->toLowerBoundInteger());
+        $this->assertSame(19230501, AntonDate::createFromString('1923-05')->toLowerBoundInteger());
+        $this->assertSame(19230515, AntonDate::createFromString('1923-05-15')->toLowerBoundInteger());
+    }
+
+    public function testToUpperBoundInteger() : void
+    {
+        $this->assertSame(0, AntonDate::createFromString('0000')->toUpperBoundInteger());
+        $this->assertSame(19231231, AntonDate::createFromString('1923')->toUpperBoundInteger());
+        $this->assertSame(19230531, AntonDate::createFromString('1923-05')->toUpperBoundInteger());
+        $this->assertSame(19230228, AntonDate::createFromString('1923-02')->toUpperBoundInteger());
+        $this->assertSame(20240229, AntonDate::createFromString('2024-02')->toUpperBoundInteger());
+        $this->assertSame(19230515, AntonDate::createFromString('1923-05-15')->toUpperBoundInteger());
+    }
+
+    public function testIntervalIsAfterFlagsReversedRanges() : void
+    {
+        $start = AntonDate::createFromString('2000-05-15');
+        $end = AntonDate::createFromString('2000-03-01');
+        $this->assertTrue($start->intervalIsAfter($end));
+    }
+
+    public function testIntervalIsAfterAcceptsPartialEndCoveringStart() : void
+    {
+        // start in May 1923, end "sometime in 1923" → still valid
+        $start = AntonDate::createFromString('1923-05-15');
+        $end = AntonDate::createFromString('1923');
+        $this->assertFalse($start->intervalIsAfter($end));
+    }
+
+    public function testIntervalIsAfterAcceptsPartialStartBeforeFullEnd() : void
+    {
+        // start in 1923 (year-only), end in May 1923
+        $start = AntonDate::createFromString('1923');
+        $end = AntonDate::createFromString('1923-05-15');
+        $this->assertFalse($start->intervalIsAfter($end));
+    }
+
+    public function testIntervalIsAfterFlagsYearMismatch() : void
+    {
+        $start = AntonDate::createFromString('1923');
+        $end = AntonDate::createFromString('1922');
+        $this->assertTrue($start->intervalIsAfter($end));
+    }
+
+    public function testIntervalIsAfterReturnsFalseWhenEitherIsUnset() : void
+    {
+        $set = AntonDate::createFromString('1923-05-15');
+        $unset = AntonDate::createFromString('0000');
+        $this->assertFalse($set->intervalIsAfter($unset));
+        $this->assertFalse($unset->intervalIsAfter($set));
+    }
+
+    public function testIntervalIsAfterTreatsEqualDatesAsValid() : void
+    {
+        $a = AntonDate::createFromString('1923-05-15');
+        $b = AntonDate::createFromString('1923-05-15');
+        $this->assertFalse($a->intervalIsAfter($b));
+    }
 }

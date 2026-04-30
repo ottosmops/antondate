@@ -396,6 +396,55 @@ final class AntonDate implements ValueObjectInterface
         return $this->toInteger() < $date->toInteger();
     }
 
+    /**
+     * Treats the AntonDate as an interval and returns its lower bound as
+     * an integer (YYYYMMDD). A year-only "1923" → 19230101; "1923-05" → 19230501.
+     * Returns 0 if no date is set.
+     */
+    public function toLowerBoundInteger() : int
+    {
+        if ($this->getYear() === 0) {
+            return 0;
+        }
+        $month = $this->getMonth() > 0 ? $this->getMonth() : 1;
+        $day = $this->getDay() > 0 ? $this->getDay() : 1;
+        return $this->getYear() * 10000 + $month * 100 + $day;
+    }
+
+    /**
+     * Treats the AntonDate as an interval and returns its upper bound as
+     * an integer (YYYYMMDD). A year-only "1923" → 19231231; "1923-02" → 19230228
+     * (or 19230229 in a leap year). Returns 0 if no date is set.
+     */
+    public function toUpperBoundInteger() : int
+    {
+        if ($this->getYear() === 0) {
+            return 0;
+        }
+        $month = $this->getMonth() > 0 ? $this->getMonth() : 12;
+        $day = $this->getDay() > 0
+            ? $this->getDay()
+            : (int) (new \DateTimeImmutable(sprintf('%04d-%02d-01', $this->getYear(), $month)))->format('t');
+        return $this->getYear() * 10000 + $month * 100 + $day;
+    }
+
+    /**
+     * True when this AntonDate's interval is entirely after the given date's interval.
+     * Useful for validating start/end ranges where partial dates are allowed:
+     * a year-only "1923" overlaps any 1923-MM-DD, so "1923-05-15" is NOT after "1923".
+     * "1923-05-15" IS after "1922" (1922 ends 1922-12-31, 1923-05-15 starts after that).
+     * Returns false when either side has no date — the comparison is then undefined.
+     */
+    public function intervalIsAfter(AntonDate $other) : bool
+    {
+        $thisLower = $this->toLowerBoundInteger();
+        $otherUpper = $other->toUpperBoundInteger();
+        if ($thisLower === 0 || $otherUpper === 0) {
+            return false;
+        }
+        return $thisLower > $otherUpper;
+    }
+
      /**
      * Create a new Date
      * [year  => JJJJ
